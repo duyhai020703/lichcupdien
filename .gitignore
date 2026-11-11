@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+sent_notifications.json
+*.log

@@ -1,0 +1,30 @@
+{
+  "name": "Lịch Cúp Điện Tây Ninh",
+  "short_name": "Cúp Điện TN",
+  "description": "Tra cứu lịch ngừng giảm cung cấp điện các phường xã, khu phố tỉnh Tây Ninh",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
+

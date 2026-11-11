@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "main.py"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron-daily",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron-weekly",
+      "schedule": "5 0 * * 1"
+    }
+  ]
+}

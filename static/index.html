@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Lịch Cúp Điện Tây Ninh</title>
+  
+  <!-- Cấu hình chuẩn iOS Mobile & PWA Full Screen -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lịch Cúp Điện">
+  <meta name="theme-color" content="#0b0f19">
+  
+  <!-- iOS App Icon -->
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
+  <link rel="manifest" href="/static/manifest.json">
+
+  <!-- CSS Style -->
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <img src="/static/apple-touch-icon.png" alt="Logo" class="app-icon">
+        <div class="title-wrap">
+          <h1>⚡ Cúp Điện Tây Ninh</h1>
+          <p>Dữ liệu trực tiếp từ EVN SPC</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btnRefresh" class="btn-icon" title="Làm mới">
+          🔄
+        </button>
+      </div>
+    </header>
+
+    <!-- Chọn Ngày (Thanh Cuộn Ngang Kiểu iOS) -->
+    <div class="date-selector-wrapper">
+      <div class="scroll-row" id="dateScrollRow">
+        <!-- Được sinh tự động bởi app.js: Hôm nay, Ngày mai, T5, T6, T7, CN... -->
+      </div>
+    </div>
+
+    <!-- Nút Lọc Nhanh Địa Bàn Của Người Dùng -->
+    <div class="quick-filter-banner">
+      <button id="btnFilterKp2" class="filter-btn starred">
+        ⭐ Khu phố 2, Phường Tân Ninh
+      </button>
+    </div>
+
+    <!-- Bộ Lọc Đơn Vị Điện Lực & Tìm Kiếm -->
+    <div class="controls-row">
+      <select id="selectUnit" class="select-unit">
+        <option value="ALL">🏛️ Tất cả huyện/thị</option>
+        <option value="PB0501" selected>Điện lực Tân Ninh (TP. Tây Ninh)</option>
+        <option value="PB0502">Điện lực Gò Dầu</option>
+        <option value="PB0503">Điện lực Trảng Bàng</option>
+        <option value="PB0504">Điện lực Tân Châu</option>
+        <option value="PB0505">Điện lực Thái Bình (Châu Thành)</option>
+        <option value="PB0506">Điện lực Dương Minh Châu</option>
+        <option value="PB0507">Điện lực Tân Biên</option>
+        <option value="PB0508">Điện lực Hòa Thành</option>
+        <option value="PB0509">Điện lực Bến Cầu</option>
+      </select>
+
+      <div class="search-input-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Tìm xã, phường, khu phố...">
+      </div>
+    </div>
+
+    <!-- Thẻ Tổng Quan Trạng Thái -->
+    <div class="summary-card">
+      <div class="summary-info">
+        <h2 id="summaryTitle">Tổng quan trong ngày</h2>
+        <p id="summaryDesc">Đang tải dữ liệu...</p>
+      </div>
+      <span id="summaryCount" class="badge-count">-- điểm</span>
+    </div>
+
+    <!-- Thanh Điều Hướng Nhanh Tới Từng Phường/Xã -->
+    <div class="ward-nav" id="wardNav">
+      <!-- Được sinh động bởi app.js -->
+    </div>
+
+    <!-- Danh Sách Các Khu Vực Cúp Điện -->
+    <div class="outage-list" id="outageList">
+      <!-- Cards rendered here -->
+    </div>
+
+    <!-- Hướng Dẫn Thêm Vào Màn Hình Chính iPhone -->
+    <div class="ios-banner" id="iosGuideBanner">
+      <div class="ios-banner-icon">📲</div>
+      <div class="ios-banner-text">
+        <h4>Cài làm ứng dụng trên iPhone</h4>
+        <p>Bấm nút <strong>Chia sẻ (Share) ⬆️</strong> ở dưới Safari &gt; Chọn <strong>"Thêm vào MH chính" ➕</strong> để mở nhanh từ màn hình điện thoại!</p>
+      </div>
+    </div>
+
+    <div style="height: 60px;"></div>
+  </div>
+
+  <!-- Thanh Hành Động Cố Định Phía Dưới -->
+  <div class="bottom-bar">
+    <button id="btnSendTelegram" class="btn-telegram">
+      📩 Gửi lịch cả tuần về Telegram
+    </button>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
+
