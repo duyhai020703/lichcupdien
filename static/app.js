@@ -1,5 +1,6 @@
 // State
 let state = {
+  currentView: "daily", // "daily" hoặc "weekly"
   selectedDate: "",
   selectedUnit: "ALL",
   selectedWard: "ALL",
@@ -8,6 +9,7 @@ let state = {
   rawItems: [],
   wardsSummary: {},
   loading: false,
+  weeklyData: null,
 };
 
 // Utilities
@@ -28,6 +30,7 @@ const WEEKDAYS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 
 function initDateRow() {
   const row = document.getElementById("dateScrollRow");
+  if (!row) return;
   row.innerHTML = "";
   const today = new Date();
 
@@ -64,6 +67,125 @@ function initDateRow() {
   state.selectedDate = formatDateIso(today);
 }
 
+// Chuyển đổi giữa 2 chế độ xem: Lịch theo ngày vs Bảng tổng quan cả tuần
+function switchView(viewMode) {
+  state.currentView = viewMode;
+  const tabDaily = document.getElementById("tabDaily");
+  const tabWeekly = document.getElementById("tabWeekly");
+  const dailyView = document.getElementById("dailyView");
+  const weeklyView = document.getElementById("weeklyView");
+
+  if (viewMode === "weekly") {
+    tabDaily.classList.remove("active");
+    tabWeekly.classList.add("active");
+    dailyView.style.display = "none";
+    weeklyView.style.display = "block";
+    loadWeeklyData();
+  } else {
+    tabWeekly.classList.remove("active");
+    tabDaily.classList.add("active");
+    weeklyView.style.display = "none";
+    dailyView.style.display = "block";
+  }
+}
+
+// Tải bảng tổng quan cả tuần (T2 - CN)
+async function loadWeeklyData() {
+  const rowsList = document.getElementById("weeklyRowsList");
+  const titleEl = document.getElementById("weeklyTitle");
+  const btnRefreshWeekly = document.getElementById("btnRefreshWeekly");
+
+  if (btnRefreshWeekly) btnRefreshWeekly.classList.add("rotating");
+
+  rowsList.innerHTML = `
+    <div style="text-align:center; padding: 40px 0;">
+      <div class="spinner"></div>
+      <p style="margin-top:12px; color: var(--text-secondary); font-size: 13px;">Đang quét lịch cả tuần từ EVN SPC...</p>
+    </div>
+  `;
+
+  try {
+    const resp = await fetch("/api/weekly");
+    const data = await resp.json();
+    state.weeklyData = data;
+
+    // Cập nhật tiêu đề khoảng ngày
+    const sDate = data.start_week ? data.start_week.split("-").reverse().join("/") : "";
+    const eDate = data.end_week ? data.end_week.split("-").reverse().join("/") : "";
+    if (sDate && eDate) {
+      titleEl.textContent = `⚡ Bảng tổng quan cả tuần (${sDate.substring(0, 5)} - ${eDate})`;
+    }
+
+    renderWeeklyTable(data);
+  } catch (err) {
+    console.error(err);
+    rowsList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <h3>Không thể tải bảng tổng quan tuần</h3>
+        <p>Vui lòng thử lại sau.</p>
+      </div>
+    `;
+  } finally {
+    if (btnRefreshWeekly) btnRefreshWeekly.classList.remove("rotating");
+  }
+}
+
+// Render từng ngày trong bảng tổng quan tuần
+function renderWeeklyTable(data) {
+  const rowsList = document.getElementById("weeklyRowsList");
+  const days = data.days || [];
+
+  if (days.length === 0) {
+    rowsList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🟢</div>
+        <h3>Không có lịch cúp điện tuần này</h3>
+        <p>Toàn bộ các ngày trong tuần đều có điện ổn định.</p>
+      </div>
+    `;
+    return;
+  }
+
+  rowsList.innerHTML = days.map(d => {
+    const isOutage = d.is_outage;
+    const badgeClass = isOutage ? "badge-red" : "badge-green";
+    const indicatorClass = isOutage ? "indicator-red" : "indicator-green";
+    const textClass = isOutage ? "text-red" : "text-green";
+    const rowClass = isOutage ? "weekly-day-row has-outage" : "weekly-day-row no-outage";
+
+    // Format ngày hiển thị: DD/MM
+    const dateParts = d.date.split("-");
+    const displayDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}` : d.date;
+
+    const detailsHtml = (d.outages && d.outages.length > 0) ? `
+      <div class="outage-details-mini">
+        ${d.outages.map(o => `
+          <div class="mini-detail-row">📍 <strong>Địa điểm:</strong> ${o.location}</div>
+          <div class="mini-detail-row cause">🛠 <strong>Lý do:</strong> ${o.cause}</div>
+        `).join("")}
+      </div>
+    ` : "";
+
+    return `
+      <div class="${rowClass}">
+        <div class="day-badge-col">
+          <span class="day-code-badge ${badgeClass}">${d.weekday_code}</span>
+          <span class="day-date-sub">${displayDate}</span>
+        </div>
+        <div class="day-content-col">
+          <div class="day-status-line">
+            <span class="status-indicator ${indicatorClass}"></span>
+            <strong class="${textClass}">${d.status_text}</strong>
+          </div>
+          ${detailsHtml}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// Tải dữ liệu theo ngày
 async function loadData() {
   const listEl = document.getElementById("outageList");
   const refreshBtn = document.getElementById("btnRefresh");
@@ -105,6 +227,7 @@ async function loadData() {
 
 function renderWardsNav() {
   const nav = document.getElementById("wardNav");
+  if (!nav) return;
   nav.innerHTML = "";
 
   const allChip = document.createElement("div");
@@ -137,7 +260,7 @@ function applyFiltersAndRender() {
 
   let filtered = [...state.rawItems];
 
-  // 1. Lọc nhanh: Chỉ hiển thị Khu phố 2, Phường Tân Ninh
+  // 1. Lọc nhanh KP2 Tân Ninh
   if (state.filterKp2Only) {
     filtered = filtered.filter(item => {
       const loc = item.location.toLowerCase();
@@ -175,7 +298,7 @@ function applyFiltersAndRender() {
     summaryDescEl.textContent = `Có ${filtered.length} điểm ngừng cấp điện tại Tây Ninh`;
   }
 
-  // 3. Gom nhóm theo Phường / Xã (Chuẩn theo format web lịch cúp điện)
+  // 3. Gom nhóm theo Phường / Xã
   const wardGroups = {};
   filtered.forEach(item => {
     const wards = (item.wards && item.wards.length > 0) ? item.wards : ["Khu vực khác"];
@@ -202,14 +325,12 @@ function applyFiltersAndRender() {
     return;
   }
 
-  // Sắp xếp: Phường Tân Ninh lên đầu nếu có
   wardNames.sort((a, b) => {
     if (a.toLowerCase().includes("tân ninh")) return -1;
     if (b.toLowerCase().includes("tân ninh")) return 1;
     return a.localeCompare(b, "vi");
   });
 
-  // Render từng bảng thẻ phường
   listEl.innerHTML = wardNames.map(wardName => {
     const items = wardGroups[wardName];
     items.sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
@@ -267,6 +388,54 @@ function applyFiltersAndRender() {
 document.addEventListener("DOMContentLoaded", () => {
   initDateRow();
 
+  // Tab chuyển đổi
+  const tabDaily = document.getElementById("tabDaily");
+  const tabWeekly = document.getElementById("tabWeekly");
+  if (tabDaily) tabDaily.addEventListener("click", () => switchView("daily"));
+  if (tabWeekly) tabWeekly.addEventListener("click", () => switchView("weekly"));
+
+  // Nút nhanh "Xem bảng cả tuần" trong banner
+  const btnQuickWeekly = document.getElementById("btnQuickWeekly");
+  if (btnQuickWeekly) btnQuickWeekly.addEventListener("click", () => switchView("weekly"));
+
+  // Nút làm mới bảng tuần
+  const btnRefreshWeekly = document.getElementById("btnRefreshWeekly");
+  if (btnRefreshWeekly) btnRefreshWeekly.addEventListener("click", () => loadWeeklyData());
+
+  // Nút sao chép bảng tuần
+  const btnCopyWeekly = document.getElementById("btnCopyWeekly");
+  if (btnCopyWeekly) {
+    btnCopyWeekly.addEventListener("click", () => {
+      if (!state.weeklyData) return;
+      const textToCopy = state.weeklyData.formatted_text
+        .replace(/<[^>]+>/g, ""); // Xóa thẻ HTML tag
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        alert("📋 Đã sao chép bảng tổng quan tuần vào bộ nhớ tạm! Bạn có thể dán vào Zalo/Facebook.");
+      }).catch(err => {
+        alert("Lỗi khi sao chép: " + err);
+      });
+    });
+  }
+
+  // Nút gửi Telegram từ bảng tuần
+  const btnSendWeeklyFromView = document.getElementById("btnSendWeeklyFromView");
+  if (btnSendWeeklyFromView) {
+    btnSendWeeklyFromView.addEventListener("click", async () => {
+      btnSendWeeklyFromView.disabled = true;
+      btnSendWeeklyFromView.innerHTML = "⏳ Đang gửi Telegram...";
+      try {
+        const resp = await fetch("/api/send-weekly", { method: "POST" });
+        await resp.json();
+        alert("✅ Đã gửi bảng tổng quan tuần vào Group Telegram!");
+      } catch (e) {
+        alert("❌ Lỗi khi gửi Telegram: " + e.message);
+      } finally {
+        btnSendWeeklyFromView.disabled = false;
+        btnSendWeeklyFromView.innerHTML = "📩 Gửi vào Group Telegram";
+      }
+    });
+  }
+
   // Nút Lọc nhanh KP2 Tân Ninh
   const btnKp2 = document.getElementById("btnFilterKp2");
   if (btnKp2) {
@@ -304,7 +473,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Nút gửi Telegram
+  // Nút gửi Telegram ở thanh đáy
   const btnSendTg = document.getElementById("btnSendTelegram");
   if (btnSendTg) {
     btnSendTg.addEventListener("click", async () => {
@@ -312,7 +481,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btnSendTg.innerHTML = "⏳ Đang gửi Telegram...";
       try {
         const resp = await fetch("/api/send-weekly", { method: "POST" });
-        const res = await resp.json();
+        await resp.json();
         alert("✅ Đã gửi bản tin tổng hợp tới Telegram của bạn!");
       } catch (e) {
         alert("❌ Lỗi khi gửi Telegram: " + e.message);
@@ -323,6 +492,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Load ban đầu
+  // Load dữ liệu ban đầu
   loadData();
 });

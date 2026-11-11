@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Lịch Cúp Điện">
-  <meta name="theme-color" content="#0b0f19">
+  <meta name="theme-color" content="#080d11">
   
   <!-- iOS App Icon -->
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -40,58 +40,107 @@
       </div>
     </header>
 
-    <!-- Chọn Ngày (Thanh Cuộn Ngang Kiểu iOS) -->
-    <div class="date-selector-wrapper">
-      <div class="scroll-row" id="dateScrollRow">
-        <!-- Được sinh tự động bởi app.js: Hôm nay, Ngày mai, T5, T6, T7, CN... -->
-      </div>
-    </div>
-
-    <!-- Nút Lọc Nhanh Địa Bàn Của Người Dùng -->
-    <div class="quick-filter-banner">
-      <button id="btnFilterKp2" class="filter-btn starred">
-        ⭐ Khu phố 2, Phường Tân Ninh
+    <!-- Nút Chuyển Đổi Tab: Xem theo ngày vs Tổng quan cả tuần -->
+    <div class="view-mode-tabs">
+      <button id="tabDaily" class="tab-btn active">
+        📅 Lịch theo ngày
+      </button>
+      <button id="tabWeekly" class="tab-btn">
+        📊 Bảng tổng quan cả tuần (T2 - CN)
       </button>
     </div>
 
-    <!-- Bộ Lọc Đơn Vị Điện Lực & Tìm Kiếm -->
-    <div class="controls-row">
-      <select id="selectUnit" class="select-unit">
-        <option value="ALL">🏛️ Tất cả huyện/thị</option>
-        <option value="PB0501" selected>Điện lực Tân Ninh (TP. Tây Ninh)</option>
-        <option value="PB0502">Điện lực Gò Dầu</option>
-        <option value="PB0503">Điện lực Trảng Bàng</option>
-        <option value="PB0504">Điện lực Tân Châu</option>
-        <option value="PB0505">Điện lực Thái Bình (Châu Thành)</option>
-        <option value="PB0506">Điện lực Dương Minh Châu</option>
-        <option value="PB0507">Điện lực Tân Biên</option>
-        <option value="PB0508">Điện lực Hòa Thành</option>
-        <option value="PB0509">Điện lực Bến Cầu</option>
-      </select>
+    <!-- ============================================== -->
+    <!-- PHẦN 1: CHẾ ĐỘ XEM THEO NGÀY (DAILY VIEW)      -->
+    <!-- ============================================== -->
+    <div id="dailyView">
+      <!-- Chọn Ngày (Thanh Cuộn Ngang Kiểu iOS) -->
+      <div class="date-selector-wrapper">
+        <div class="scroll-row" id="dateScrollRow">
+          <!-- Được sinh tự động bởi app.js -->
+        </div>
+      </div>
 
-      <div class="search-input-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" class="search-input" placeholder="Tìm xã, phường, khu phố...">
+      <!-- Nút Lọc Nhanh -->
+      <div class="quick-filter-banner">
+        <button id="btnFilterKp2" class="filter-btn starred">
+          ⭐ Lọc KP 2, P. Tân Ninh
+        </button>
+        <button id="btnQuickWeekly" class="filter-btn weekly">
+          📊 Xem bảng cả tuần
+        </button>
+      </div>
+
+      <!-- Bộ Lọc Đơn Vị Điện Lực & Tìm Kiếm -->
+      <div class="controls-row">
+        <select id="selectUnit" class="select-unit">
+          <option value="ALL">🏛️ Tất cả huyện/thị</option>
+          <option value="PB0501" selected>Điện lực Tân Ninh (TP. Tây Ninh)</option>
+          <option value="PB0502">Điện lực Gò Dầu</option>
+          <option value="PB0503">Điện lực Trảng Bàng</option>
+          <option value="PB0504">Điện lực Tân Châu</option>
+          <option value="PB0505">Điện lực Thái Bình (Châu Thành)</option>
+          <option value="PB0506">Điện lực Dương Minh Châu</option>
+          <option value="PB0507">Điện lực Tân Biên</option>
+          <option value="PB0508">Điện lực Hòa Thành</option>
+          <option value="PB0509">Điện lực Bến Cầu</option>
+        </select>
+
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" class="search-input" placeholder="Tìm xã, phường, khu phố...">
+        </div>
+      </div>
+
+      <!-- Thẻ Tổng Quan Trạng Thái -->
+      <div class="summary-card">
+        <div class="summary-info">
+          <h2 id="summaryTitle">Tổng quan trong ngày</h2>
+          <p id="summaryDesc">Đang tải dữ liệu...</p>
+        </div>
+        <span id="summaryCount" class="badge-count">-- điểm</span>
+      </div>
+
+      <!-- Thanh Điều Hướng Nhanh Tới Từng Phường/Xã -->
+      <div class="ward-nav" id="wardNav">
+        <!-- Được sinh động bởi app.js -->
+      </div>
+
+      <!-- Danh Sách Các Khu Vực Cúp Điện Dạng Bảng -->
+      <div class="outage-list" id="outageList">
+        <!-- Bảng được render theo format dạng ảnh -->
       </div>
     </div>
 
-    <!-- Thẻ Tổng Quan Trạng Thái -->
-    <div class="summary-card">
-      <div class="summary-info">
-        <h2 id="summaryTitle">Tổng quan trong ngày</h2>
-        <p id="summaryDesc">Đang tải dữ liệu...</p>
+    <!-- ============================================== -->
+    <!-- PHẦN 2: CHẾ ĐỘ XEM BẢNG TỔNG QUAN CẢ TUẦN       -->
+    <!-- ============================================== -->
+    <div id="weeklyView" style="display: none;">
+      <div class="weekly-container">
+        <div class="weekly-card-header">
+          <div>
+            <h2 id="weeklyTitle">⚡ Bảng tổng quan cả tuần (T2 - CN)</h2>
+            <p id="weeklySub">📍 Khu vực: Khu phố 2, Phường Tân Ninh</p>
+          </div>
+          <button id="btnRefreshWeekly" class="btn-icon" title="Cập nhật">
+            🔄
+          </button>
+        </div>
+
+        <div id="weeklyRowsList" class="weekly-rows-wrap">
+          <!-- Các hàng T2: Không cúp, T3: Cúp điện... render ở đây -->
+        </div>
+
+        <!-- Nút tiện ích cho bảng tuần -->
+        <div class="weekly-actions-row">
+          <button id="btnCopyWeekly" class="action-btn copy">
+            📋 Sao chép bảng tuần (để gửi Zalo)
+          </button>
+          <button id="btnSendWeeklyFromView" class="action-btn send">
+            📩 Gửi vào Group Telegram
+          </button>
+        </div>
       </div>
-      <span id="summaryCount" class="badge-count">-- điểm</span>
-    </div>
-
-    <!-- Thanh Điều Hướng Nhanh Tới Từng Phường/Xã -->
-    <div class="ward-nav" id="wardNav">
-      <!-- Được sinh động bởi app.js -->
-    </div>
-
-    <!-- Danh Sách Các Khu Vực Cúp Điện -->
-    <div class="outage-list" id="outageList">
-      <!-- Cards rendered here -->
     </div>
 
     <!-- Hướng Dẫn Thêm Vào Màn Hình Chính iPhone -->
@@ -103,7 +152,7 @@
       </div>
     </div>
 
-    <div style="height: 60px;"></div>
+    <div style="height: 70px;"></div>
   </div>
 
   <!-- Thanh Hành Động Cố Định Phía Dưới -->
@@ -116,4 +165,3 @@
   <script src="/static/app.js"></script>
 </body>
 </html>
-

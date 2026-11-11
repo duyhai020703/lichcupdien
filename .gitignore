@@ -4,3 +4,4 @@ __pycache__/
 .env
 sent_notifications.json
 *.log
+

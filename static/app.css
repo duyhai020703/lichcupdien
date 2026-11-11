@@ -53,7 +53,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0 14px 0;
+  padding: 8px 0 12px 0;
 }
 
 .header-left {
@@ -106,6 +106,40 @@ body {
 .btn-icon:active {
   transform: scale(0.92);
   background: var(--accent-blue);
+}
+
+/* View Mode Tabs (Chuyển chế độ xem) */
+.view-mode-tabs {
+  display: flex;
+  gap: 6px;
+  background: var(--bg-secondary);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  margin-bottom: 14px;
+  border: 1px solid var(--border-color);
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tab-btn.active {
+  background: #1e293b;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Date Selector Horizontal Scroll */
@@ -196,6 +230,12 @@ body {
   font-weight: 700;
 }
 
+.filter-btn.weekly {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+}
+
 .filter-btn:active {
   transform: scale(0.96);
 }
@@ -282,7 +322,7 @@ body {
   border-color: rgba(16, 185, 129, 0.3);
 }
 
-/* Ward Chips Horizontal Nav */
+/* Ward Chips */
 .ward-nav {
   display: flex;
   gap: 6px;
@@ -443,6 +483,208 @@ body {
   color: #94a3b8;
   font-size: 13px;
   min-width: 150px;
+}
+
+/* ========================================================
+   BẢNG TỔNG QUAN CẢ TUẦN (WEEKLY VIEW)
+   ======================================================== */
+.weekly-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.weekly-card-header {
+  background: var(--bg-card-header);
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.weekly-card-header h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 3px;
+}
+
+.weekly-card-header p {
+  font-size: 13px;
+  color: #fbbf24;
+  font-weight: 500;
+}
+
+.weekly-rows-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.weekly-day-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 14px;
+  transition: background 0.15s ease;
+}
+
+.weekly-day-row:last-child {
+  border-bottom: none;
+}
+
+.weekly-day-row.has-outage {
+  background: rgba(239, 68, 68, 0.06);
+  border-left: 3px solid var(--accent-red);
+}
+
+.weekly-day-row.no-outage {
+  border-left: 3px solid var(--accent-green);
+}
+
+.day-badge-col {
+  flex-shrink: 0;
+  width: 60px;
+  text-align: center;
+}
+
+.day-code-badge {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.day-code-badge.badge-green {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.day-code-badge.badge-red {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.day-date-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.day-content-col {
+  flex: 1;
+}
+
+.day-status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  margin-bottom: 2px;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.indicator-green {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.indicator-red {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.text-green {
+  color: #34d399;
+  font-weight: 600;
+}
+
+.text-red {
+  color: #f87171;
+  font-weight: 700;
+}
+
+.outage-details-mini {
+  margin-top: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mini-detail-row {
+  font-size: 13px;
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+
+.mini-detail-row.cause {
+  color: #fbbf24;
+  font-size: 12px;
+}
+
+.weekly-actions-row {
+  padding: 14px 18px;
+  background: #101b1f;
+  display: flex;
+  gap: 10px;
+  border-top: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+  min-width: 200px;
+}
+
+.action-btn.copy {
+  background: #334155;
+  color: #ffffff;
+}
+
+.action-btn.copy:active {
+  background: #475569;
+  transform: scale(0.97);
+}
+
+.action-btn.send {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+}
+
+.action-btn.send:active {
+  transform: scale(0.97);
 }
 
 /* Empty State */
